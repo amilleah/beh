@@ -1,0 +1,11 @@
+﻿stimulus_1,stimulus_2,condition,correct_response
+Item A,Item A,condition_1,2
+Item B,Item C,condition_2,1
+Item A,Item B,condition_1,2
+Item B,Item A,condition_1,2
+Item A,Item A,condition_1,1
+Item C,Item C,condition_1,1
+Item C,Item A,condition_1,1
+Item B,Item A,condition_1,2
+Item B,Item B,condition_1,1
+Item A,Item C,condition_1,2
