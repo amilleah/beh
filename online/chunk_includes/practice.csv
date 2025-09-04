@@ -1,0 +1,7 @@
+Match,Condition,Sentence,Probe
+Match,1,try your best here,try your best here
+Mismatch,3,you can do it,she can do it
+Mismatch,4,words flash on screen,words print on screen
+Mismatch,3,word fast read this,book fast read this
+Match,1,it do can you,it do can you
+Match,2,roll clouds dark in,roll clouds dark in
