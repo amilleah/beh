@@ -1,112 +1,99 @@
-# PsychoPy Behavioral Experiment
+# Behavioral Experiment (Online + In‑Person)
 
-Rapid stimulus presentation experiment with MEG/EEG trigger support for psychophysiology research.
+This repository contains two matched implementations of a rapid sentence comparison task:
 
-## Experiment Design
+- `online/`: A PCIbex/PennController experiment for web deployment
+- `in-person/`: A PsychoPy experiment for lab use
 
-### Task Structure
-All trials have quit, 'q', and pause, 'p', functionality. 
-Use 's' to unpause/exit the experiment.
+Both versions share the same stimulus schema and timing structure to enable dual use and comparable data.
 
-- 8 blocks of randomized trials from `experiment.csv`
+## Structure
 
-[+]   [blank screen]   [Stim1]   [blank screen]   [Stim2]     [blank screen until response]
+- `online/`
+  - `data_includes/main.js`: Experiment flow and timings (PennController)
+  - `chunk_includes/*.html`: Consent, welcome, instructions, begin, final screens
+  - `chunk_includes/stimuli.csv`, `chunk_includes/practice.csv`: Stimulus lists (Match, Condition, Sentence, Probe)
+- `in-person/`
+  - `main.py`: PsychoPy experiment (parity with online timings/keys)
+  - `experiment.py`: Older variant; `main.py` is the current entry point
+  - `stimuli/stimuli.csv`, `stimuli/practice.csv`: Stimulus lists (same schema)
+  - `stimuli/feedback.csv`: Optional fun-fact/joke content for breaks
+  - `port_open_send.py`: Trigger/port helper
+  - `pyproject.toml`: Python project metadata
+- `logs/`: Participant CSV output (created on run)
 
-- Timing is configurable in `experiment.py`.
-- Expected response is keyboard input: '1' or '2'.
-- Halfway through experiment, there is a block break that requires experimenter progression with keybord input 's'.
-- Halfway through experiment, there is an feedback screen implemented, this can optionally be used to give more questions, or for providing fun facts for attention/engagement. 
+## Stimulus Schema
 
-### Hardware Integration
-- **Triggers**: Automated MEG event markers via serial port
-- **Photodiode**: Onset timing synchronization
-- **Response**: Keyboard input with timing
-- **Display**: Configurable fullscreen/windowed presentation
+All CSVs use the same columns:
+- `Match`: Match/Mismatch indicator (e.g., Match/Mismatch or 1/0)
+- `Condition`: Numeric condition 1–4 (drives trigger mapping in-person)
+- `Sentence`: Prime/first item
+- `Probe`: Target/second item
 
-## Installation
+## Task Flow
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
+- Fixation (+) → blank → Sentence → blank → Probe → blank (response window) → jitter
+- Keys: SAME = `2`, DIFFERENT = `1`
+- Practice shows feedback (Correct/Wrong); main blocks do not
 
-# Configure serial port (update in port_open_send.py)
-ser.port = '/dev/cu.usbserial-XXXXX'  # Replace with your port
-```
+## Timings
 
-## Usage
+- Fixation: 200 ms
+- Blank1: 200 ms
+- Sentence: 300 ms
+- Blank2: 500 ms
+- Probe: 300 ms
+- Feedback (practice only): 500 ms
+- Jitter: 300–700 ms in 10 ms steps
 
-### Setup
-1. **Stimuli Files**: With CSV files in `stimuli/` directory:
-   - `experiment.csv`: Main experimental trials
-   - `practice.csv`: Practice session trials
-   - `feedback.csv`: Optional break content
+## Online (PCIbex/PennController)
 
-2. **Hardware**: Connect trigger device and update port configuration
+- Entry: `online/data_includes/main.js`
+- Assets: `online/chunk_includes/*.html`, `online/chunk_includes/*.csv`
+- Configure your hosting (e.g., PCIbex Farm or self-hosted) and upload the entire `online/` folder contents.
+- Prolific integration: `final` screen contains a completion link to update.
 
-3. **Launch**: `cd` to experiment folder and Run `python experiment.py`
+## In‑Person (PsychoPy)
 
-### GUI Options
-- **Participant ID**: Subject identifier for data logging
-- **Fullscreen**: Toggle fullscreen presentation
-- **Auto Respond**: Response simulation for testing
+### Requirements
 
-## Configuration
+- Requirements found in pyproject.toml (install via pip or uv)
+- Serial port for sending event triggers (Optional, else warning)
 
-### Timing Parameters
-```python
-ONSET = 300      # Stimulus duration (ms)
-OFFSET = 500     # Inter-stimulus interval (ms)
-JITTER = (200, 800)  # Random inter-trial interval range (ms)
-```
+### Run Options (GUI)
 
-### Trigger Mapping
-```python
-condition_map_1 = {
-    'condition_A': 'ch160',
-    'condition_B': 'ch161',
-    'condition_C': 'ch162',
-    'condition_D': 'ch163'
-}
-```
+- Participant ID
+- Fullscreen (on/off)
+- Auto respond? (debug-only)
+- Use frame-based timing? (on by default)
+  - On: Frame-synced durations with +1-frame bias to avoid undershoot
+  - Off: Uses `core.wait` for timing
 
-### Response Keys
-- **'1'**: Different response (left middle finger)
-- **'2'**: Same response (left index finger)
-- **'p'**: Pause experiment
-- **'q'**: Quit experiment
+### Triggers/Photodiode
 
-## Data Output
+- `port_open_send.py` sends event triggers when available. If no device is connected, warnings will print.
+- A small white square can be drawn for photodiode timing (enabled by default in code).
 
-### Logged Variables
-- Trial-by-trial responses and reaction times
-- Stimulus conditions and timing
-- Accuracy metrics and performance feedback
-- Hardware trigger timestamps
+### Data Output
 
-### File Structure
-```
-logs/                    # generated in the directory above beh/
-├── [participant_id]/
-│   └── [participant_id]_Experiment_logfile.csv
-beh/
-├── stimuli/
-│   ├── experiment.csv
-│   ├── practice.csv
-│   └── feedback.csv
-├── experiment.py
-└── port_open_send.py
-```
+- Saved under `logs/<ParticipantID>/<ParticipantID>_Experiment_logfile.csv`
+- Fields include: Participant, Block, Trial_num, Response, Correct, RT, Jitter, Match, Sentence, Probe, Condition
 
-## Troubleshooting
+## Parity Notes
 
-### Debug Options
-```python
-verbose = True          # Console output
-show_photodiode = True  # Stimulus onset marker, white square drawn in the corner of the screen
-send_triggers = True    # Serial port triggers
-```
+- Fonts: Stimuli use Courier New, white, 24 px (online uses 0.6em).
+- Keys and instructions are harmonized across both implementations.
+- Block structure: 8 blocks; online separates via `trialsPerBlock`, in-person chunks stimuli evenly.
+
+## Development Tips
+
+- Press 's' to exit the in-person experiment and save a log file
+- To switch timing mode quickly: use the GUI toggle on launch.
+- If you need exact per-block counts in-person, adjust the slicing logic in `in-person/main.py`.
+- To change stimulus fonts/sizes or colors, edit `in-person/main.py` `TextStim` definitions and `online/data_includes/main.js` CSS/Text settings.
 
 ## Citation
 
-If using this experiment framework, please cite:
-- PsychoPy: Peirce et al. (2019)
+If using the in-person experiment framework, please cite:
+
+PsychoPy: Peirce et al. (2019)
