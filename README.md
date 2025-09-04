@@ -9,18 +9,17 @@ Both versions share the same stimulus schema and timing structure to enable dual
 
 ## Structure
 
-- `online/`
+- online/
   - `data_includes/main.js`: Experiment flow and timings (PennController)
   - `chunk_includes/*.html`: Consent, welcome, instructions, begin, final screens
   - `chunk_includes/stimuli.csv`, `chunk_includes/practice.csv`: Stimulus lists (Match, Condition, Sentence, Probe)
-- `in-person/`
-  - `main.py`: PsychoPy experiment (parity with online timings/keys)
-  - `experiment.py`: Older variant; `main.py` is the current entry point
-  - `stimuli/stimuli.csv`, `stimuli/practice.csv`: Stimulus lists (same schema)
+- in-person/
+  - `main.py`: PsychoPy experiment
+  - `stimuli/stimuli.csv`, `stimuli/practice.csv`: Stimulus lists (the same as in online/)
   - `stimuli/feedback.csv`: Optional fun-fact/joke content for breaks
   - `port_open_send.py`: Trigger/port helper
   - `pyproject.toml`: Python project metadata
-- `logs/`: Participant CSV output (created on run)
+- logs/: Participant CSV output (created on run)
 
 ## Stimulus Schema
 
